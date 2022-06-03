@@ -1,12 +1,12 @@
-import React, { Component } from 'react';
+import React, { Component, Suspense } from 'react';
 import './App.css';
 
 import Page1 from './Components/Page1';
-// Part 1 - No Code Splitting
-// import Page2 from './Components/Page2';
-// import Page3 from './Components/Page3';
 // Part 3 - Cleaner Code Splitting
 // import AsyncComponent from './AsyncComponent';
+// Part 4 ==> React.lazy
+const Page2Lazy = React.lazy(()=>import('./Components/Page2'))
+const Page3Lazy = React.lazy(()=>import('./Components/Page3'))
 
 class App extends Component {
   constructor() {
@@ -14,31 +14,31 @@ class App extends Component {
     this.state = {
       route: 'page1',
       // Part 2 - Code Splitting - manual
-      component: null
+      // component: null
     }
   }
   onRouteChange = (route) => {
     // Part 1 - No Code Splitting
-    // this.setState({ route: route });
+    this.setState({ route: route });
     // Part 2 - Code Splitting - manual
-    if (route === 'page1') {
-      this.setState({ route: route })
-    } else if (route === 'page2') {
-      import('./Components/Page2') // async //works because of webpack
-        .then((Page2) => {
-          this.setState({ route: route, component: Page2.default })
-        })
-        .catch(err => {
-        });
-    } else {
-      import('./Components/Page3')
-        .then((Page3) => {
-          this.setState({ route: route, component: Page3.default })
-        })
-        .catch(err => {
-          console.log(err)
-        });
-    }
+    // if (route === 'page1') {
+    //   this.setState({ route: route })
+    // } else if (route === 'page2') {
+    //   import('./Components/Page2')
+    //     .then((Page2) => {
+    //       this.setState({ route: route, component: Page2.default })
+    //     })
+    //     .catch(err => {
+    //     });
+    // } else {
+    //   import('./Components/Page3')
+    //     .then((Page3) => {
+    //       this.setState({ route: route, component: Page3.default })
+    //     })
+    //     .catch(err => {
+    //       console.log(err)
+    //     });
+    // }
   }
   render() {
     // Part 1 - No code splitting
@@ -51,11 +51,11 @@ class App extends Component {
     // }
 
     // Part 2 - No Code Splitting - manual
-    if (this.state.route === 'page1') {
-      return <Page1 onRouteChange={this.onRouteChange} />
-    } else {
-      return <this.state.component onRouteChange={this.onRouteChange} />
-    }
+    // if (this.state.route === 'page1') {
+    //   return <Page1 onRouteChange={this.onRouteChange} />
+    // } else {
+    //   return <this.state.component onRouteChange={this.onRouteChange} />
+    // }
 
     // Part 3 - Cleaner Code Splitting
     // if (this.state.route === 'page1') {
@@ -67,6 +67,15 @@ class App extends Component {
     //   const AsyncPage3 = AsyncComponent(() => import("./Components/Page3"));
     //   return <AsyncPage3 onRouteChange={this.onRouteChange} />
     // }
+
+    //Part 4
+    if (this.state.route === 'page1') {
+      return <Page1 onRouteChange={this.onRouteChange} />
+    } else if (this.state.route === 'page2') {
+      return <Suspense fallback={<div>Loading...</div>}><Page2Lazy onRouteChange={this.onRouteChange} /></Suspense>
+    } else {
+      return <Suspense fallback={<div>Loading...</div>}><Page3Lazy onRouteChange={this.onRouteChange} /></Suspense>
+    }
 
   }
 }
